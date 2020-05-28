@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    openshift.io/description: "Demonstrates manual approval of an Operator from the Operator Lifecycle Manager"
+    openshift.io/display-name: "ArgoCD OLM Manual Approval"
+  name: argocd-olm-manual-approval

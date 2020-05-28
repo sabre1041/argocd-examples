@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - "namespace.yaml"
+  - "serviceaccount.yaml"
+  - "rbac.yaml"
+  - "keycloak-operatorgroup.yaml"
+  - "keycloak-subscription.yaml"
+  - "approve-installplan-job.yaml"
