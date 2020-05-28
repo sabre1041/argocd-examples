@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+  name: installplan-approver
+  namespace: argocd-olm-manual-approval
+spec:
+  template:
+    spec:
+      containers:
+        - image: registry.redhat.io/openshift4/ose-cli:v4.4
+          env:
+            - name: APPROVAL_NAMESPACES
+              value: "argocd-olm-manual-approval"
+          command:
+            - /bin/bash
+            - -c
+            - |
+              export HOME=/tmp/approver
+
+              for namespace in $APPROVAL_NAMESPACES
+              do
+                for subscription in `oc get subscription -n $namespace -o name`
+                do 
+                  until [ "$(oc get $subscription -n $namespace -o jsonpath='{ .status.installplan.name }')" != "" ]; do sleep 2; done
+
+                  installplan=$(oc get $subscription -n $namespace -o jsonpath='{ .status.installplan.name }')
+
+                  echo "Approving Subscription $subscription with install plan $installplan"
+
+                  oc patch -n $namespace installplan $installplan --type=json -p='[{"op":"replace","path": "/spec/approved", "value": true}]'  
+
+                done
+              done
+          imagePullPolicy: IfNotPresent
+          name: installplan-approver
+      dnsPolicy: ClusterFirst
+      restartPolicy: OnFailure
+      serviceAccount: installplan-approver
+      serviceAccountName: installplan-approver
+      terminationGracePeriodSeconds: 30

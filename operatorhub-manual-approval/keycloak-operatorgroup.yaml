@@ -1,0 +1,8 @@
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: keycloak-operator
+  namespace: argocd-olm-manual-approval
+spec:
+  targetNamespaces:
+    - argocd-olm-manual-approval
