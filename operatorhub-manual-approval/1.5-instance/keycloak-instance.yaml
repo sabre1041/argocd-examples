@@ -4,6 +4,9 @@ metadata:
   name: keycloak
   namespace: argocd-olm-manual-approval
 spec:
+  extensions:
+    - >-
+      https://github.com/aerogear/keycloak-metrics-spi/releases/download/1.0.4/keycloak-metrics-spi-1.0.4.jar
   externalAccess:
     enabled: true
   instances: 1
