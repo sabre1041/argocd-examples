@@ -25,14 +25,21 @@ spec:
               do
                 for subscription in `oc get subscription -n $namespace -o name`
                 do 
-                  until [ "$(oc get $subscription -n $namespace -o jsonpath='{ .status.installplan.name }')" != "" ]; do sleep 2; done
+                  desiredcsv=$(oc get $subscription -n $namespace -o jsonpath='{ .spec.startingCSV }')
 
-                  installplan=$(oc get $subscription -n $namespace -o jsonpath='{ .status.installplan.name }')
+                  until [ "$(oc get installplan -n $namespace -o jsonpath="{.items[?(@.spec.clusterServiceVersionNames[*] == \"$desiredcsv\")].metadata.name}")" != "" ]; do sleep 2; done
 
-                  echo "Approving Subscription $subscription with install plan $installplan"
+                  installplan=$(oc get installplan -n $namespace -o jsonpath="{.items[?(@.spec.clusterServiceVersionNames[*] == \"$desiredcsv\")].metadata.name}")
 
-                  oc patch -n $namespace installplan $installplan --type=json -p='[{"op":"replace","path": "/spec/approved", "value": true}]'  
+                  if [ "`oc get installplan $installplan -n $namespace -o jsonpath="{.spec.approved}"`" == "false" ]; then
 
+                    echo "Approving Subscription $subscription with install plan $installplan"
+
+                    oc patch -n $namespace installplan $installplan --type=json -p='[{"op":"replace","path": "/spec/approved", "value": true}]'
+
+                  else
+                    echo "Install Plan '$installplan' already approved"
+                  fi
                 done
               done
           imagePullPolicy: IfNotPresent

@@ -1,8 +1,6 @@
 apiVersion: keycloak.org/v1alpha1
 kind: Keycloak
 metadata:
-  annotations:
-    argocd.argoproj.io/sync-wave: "2"
   name: keycloak
   namespace: argocd-olm-manual-approval
 spec:
